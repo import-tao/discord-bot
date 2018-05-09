@@ -1,0 +1,4 @@
+Pathfinders is a group of people actively (and asynchronously) learning about subjects related to computer science and IT. Each member is following their own path, interweaving with the paths of other members so that knowledge and experience may be shared. Project collaboration is optional, but encouraged.
+
+Members should feel welcome to share newly acquired knowledge with the group, as well as personal projects and accomplishments. No member should be afraid to ask questions. No member should feel embarassed or inadequate due to lack of experience or modest knowledge of related topics. We all start somewhere. We are here to learn. Let us benefit from each other.
+
