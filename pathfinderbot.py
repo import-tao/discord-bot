@@ -29,6 +29,10 @@ Modified by ΨNAK
 import discord
 from discord.ext import commands
 import random
+import bs4
+from urllib.request import urlopen as uReq
+from bs4 import BeautifulSoup as soup
+
 
 # TODO: bot admin list and admin commands such as reloading of files
 
@@ -189,6 +193,32 @@ async def rps(*, message: str):
      # player_choice == bot_choice:
         await bot.say('Your {} draws with my {}.'.format(player_choice, bot_choice))
  
+@bot.command()
+async def random_module():
+    my_url = 'https://docs.python.org/3/py-modindex.html'
+    #open request, get soup and close
+    uClient = uReq(my_url)
+    page__html = uClient.read()
+    uClient.close()
+    page_soup = soup(page__html, 'html.parser')
+
+    containers = page_soup.find_all("td")
+    module_list = []
+
+    for container in containers:
+        # check if text contained
+        if container.text != '':
+            #check if there is a link present
+            if container.a != None:
+                # print(container.text)
+                # print(container.a['href'])
+                module_list.append((container.text.strip(), container.a['href']))
+
+    selected_module = (random.choice(module_list))
+    url_base = 'https://docs.python.org/3/'
+
+    await bot.say('You should do some reading about:\n {} , \nClick this link to read more: \n \
+        {}{}'.format(selected_module[0], url_base, selected_module[1]))
 
 
 # Run Bot
