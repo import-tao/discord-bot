@@ -32,6 +32,8 @@ import random
 import bs4
 from urllib.request import urlopen as uReq
 from bs4 import BeautifulSoup as soup
+import requests
+import json
 
 
 # TODO: bot admin list and admin commands such as reloading of files
@@ -219,6 +221,36 @@ async def random_module():
 
     await bot.say('You should do some reading about:\n {} , \nClick this link to read more: \n \
         {}{}'.format(selected_module[0], url_base, selected_module[1]))
+
+@bot.command()
+# command to get the first definition of a word using the Oxford English Dictionary API
+# TODO - currently just gets the first definition, would like it to return them all.
+async def definition(*, message: str):
+    try:
+        app_id = '613b4b47'
+        app_key = '7b7b4abdcfe465dc2c1464cc3e90ac96'
+        base_url = 'https://od-api.oxforddictionaries.com/api/v1/entries/'
+
+        language = 'en'
+        word_id = message
+
+        url = base_url + language + '/' + word_id.lower()
+
+        json_data = requests.get(url, headers = {'app_id': app_id, 'app_key': app_key}).json()
+
+        # for printing info
+        # r = requests.get(url, headers = {'app_id': app_id, 'app_key': app_key})
+        # print("****code {}\n".format(r.status_code))
+        # print("****text \n" + r.text)
+        # print("****json \n" + json.dumps(r.json()))
+
+        # Some kind of loop needed here to get all definitions insead of just the first one
+        definitions = json_data['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['definitions'][0]
+        
+        await bot.say('The first definition of ' + message + ' I have is :\n' + definitions)
+    except:
+        # If it cant find the word
+        await bot.say('Are you sure thats a word in the dictionary?')
 
 
 # Run Bot
