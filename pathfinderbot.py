@@ -156,6 +156,7 @@ async def rps(*, message: str):
         player_choice = 'scissors'
     else:
         await bot.say('Please try again using "!rps" + "r" or "p" or "s" to pick your play')
+        return
 
     # print("player: ", player_choice)
 
@@ -192,7 +193,7 @@ async def rps(*, message: str):
             await bot.say('My {} beats your {} ! YOU LOSE'.format(bot_choice, player_choice))
             
     else:
-     # player_choice == bot_choice:
+     # player_choice == bot_choice
         await bot.say('Your {} draws with my {}.'.format(player_choice, bot_choice))
  
 @bot.command()
