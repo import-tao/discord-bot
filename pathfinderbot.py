@@ -23,7 +23,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 -------------------------
-Modified by ΨNAK
+Modified by Pathfinders
 '''
 
 import discord
@@ -227,8 +227,8 @@ async def random_module():
 # TODO - currently just gets the first definition, would like it to return them all.
 async def definition(*, message: str):
     try:
-        app_id = '613b4b47'
-        app_key = '7b7b4abdcfe465dc2c1464cc3e90ac96'
+        app_id = oxford_id
+        app_key = oxford_key
         base_url = 'https://od-api.oxforddictionaries.com/api/v1/entries/'
 
         language = 'en'
@@ -254,6 +254,9 @@ async def definition(*, message: str):
 
 
 # Run Bot
-with open('token.txt') as token_file:
+with open('oxford_dictionary_api.txt', 'r') as oxford_key_file:
+    oxford_id = oxford_key_file.readline().rstrip()
+    oxford_key = oxford_key_file.readline().rstrip()
+with open('token.txt', 'r') as token_file:
     token = token_file.readline().rstrip()
 bot.run(token)
