@@ -192,8 +192,7 @@ async def rps(*, message: str):
         elif bot_choice == 'rock':
             await bot.say('My {} beats your {} ! YOU LOSE'.format(bot_choice, player_choice))
             
-    else:
-     # player_choice == bot_choice
+    if player_choice == bot_choice:
         await bot.say('Your {} draws with my {}.'.format(player_choice, bot_choice))
  
 @bot.command()
