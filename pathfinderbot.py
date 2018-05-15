@@ -252,6 +252,19 @@ async def definition(*, message: str):
         # If it cant find the word
         await bot.say('Are you sure thats a word in the dictionary?')
 
+@bot.command()
+async def coin(*, message: str):
+    """
+    Coin command is returning the price from a specific coin in USD.
+    """
+    r = requests.get('https://min-api.cryptocompare.com/data/price?fsym=' + message.upper() + '&tsyms=USD')
+    my_data = r.json()
+
+    for k, v in my_data.items():
+        if str(v) == 'Error':
+            await bot.say(f"{message.upper()} coin doesn't exists.")
+            break
+        await bot.say(f"{message.upper()} price is {str(v)} {k.upper()}.")
 
 # Run Bot
 with open('oxford_dictionary_api.txt', 'r') as oxford_key_file:
