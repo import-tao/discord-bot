@@ -51,34 +51,6 @@ async def on_ready():
     print(bot.user.id)
     print('------')
 
-@bot.command(pass_context=True)
-async def rmtest(ctx):
-    """Deletes test commands from the "bot-testing" channel."""
-    # TODO: check if bot has proper permissions
-    garbage = list()
-    testchan = 'bot-testing'
-    if ctx.message.channel.name != testchan:
-        await bot.say('That command can only be used in #bot-testing')
-        return
-    async for msg in bot.logs_from(ctx.message.channel):
-        if msg.content in ['!test', '!rmtest']:
-            print('BOT IS DELETING MESSAGE(S) as requested by {}'.format(
-                ctx.message.author))
-            garbage.append(msg)
-    await bot.delete_messages(garbage)
-
-
-@bot.command()
-async def test():
-    """Generic test function. May only output to terminal, rather than Discord.
-    """
-    for chan in bot.get_all_channels():
-        print(chan)
-    for mem in bot.get_all_members():
-        print(mem)
-    # print(bot.get_user_info())
-
-
 @bot.command()
 async def ping():
     """Responds with "Pong!\""""
