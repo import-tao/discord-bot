@@ -147,6 +147,7 @@ async def _bot():
 
 @bot.command()
 async def rps(*, message: str):
+    """Plays Rock Paper Scissors with the bot."""
     # Change user input to full lenght string for to say back later when telling who won
     if message.lower() == 'r':
         player_choice = 'rock'
@@ -197,6 +198,7 @@ async def rps(*, message: str):
  
 @bot.command()
 async def random_module():
+    """Links to a random Python 3 module from the standard library."""
     my_url = 'https://docs.python.org/3/py-modindex.html'
     #open request, get soup and close
     uClient = uReq(my_url)
@@ -226,6 +228,7 @@ async def random_module():
 # command to get the first definition of a word using the Oxford English Dictionary API
 # TODO - currently just gets the first definition, would like it to return them all.
 async def definition(*, message: str):
+    """Displays the first definition for a word according to oxforddictionaries.com."""
     try:
         app_id = oxford_id
         app_key = oxford_key
