@@ -277,7 +277,7 @@ async def pydoc(*, message: str):
     Post a link to the python doc page for the requested module in chat.
     """
     page = await get_page('https://docs.python.org/3/py-modindex.html')
-    page_soup = soup(page, 'lxml')
+    page_soup = soup(page, 'html.parser')
     base_url = 'https://docs.python.org/3/library/'
     # Check that requested module name is valid.
     mod_list = [mod.text for mod in page_soup.findAll('code')]
