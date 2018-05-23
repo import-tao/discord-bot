@@ -1,1 +1,1 @@
-worker: python3 pathfinderbot.py
+worker: python pathfinderbot.py
