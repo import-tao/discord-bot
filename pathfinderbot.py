@@ -292,15 +292,15 @@ async def pydoc(*, message: str):
 
 # Run Bot
 #### non-heroku method of loading keys
-with open('oxford_dictionary_api.txt', 'r') as oxford_key_file:
-    oxford_id = oxford_key_file.readline().rstrip()
-    oxford_key = oxford_key_file.readline().rstrip()
-with open('token.txt', 'r') as token_file:
-    token = token_file.readline().rstrip()
+# with open('oxford_dictionary_api.txt', 'r') as oxford_key_file:
+#     oxford_id = oxford_key_file.readline().rstrip()
+#     oxford_key = oxford_key_file.readline().rstrip()
+# with open('token.txt', 'r') as token_file:
+#     token = token_file.readline().rstrip()
 
 #### Heroku method
-# token = os.environ['TOKEN']
-# oxford_id = os.environ['OXFORD_ID']
-# oxford_key = os.environ['OXFORD_KEY']
+token = os.environ['TOKEN']
+oxford_id = os.environ['OXFORD_ID']
+oxford_key = os.environ['OXFORD_KEY']
 
 bot.run(token)
