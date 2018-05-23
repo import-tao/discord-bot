@@ -35,15 +35,14 @@ from discord.ext import commands
 from urllib.request import urlopen as uReq
 from bs4 import BeautifulSoup as soup
 from aiohttp import web
-import requests # This needs to be eliminated as it is a blocking function
 
 
 description = '''Based on an example bot to showcase the discord.ext.commands
 extension module, by Rapptz
 
 There are a number of utility commands being showcased here.'''
-bot = commands.Bot(command_prefix='!', description=description)
 
+bot = commands.Bot(command_prefix='!', description=description)
 
 ### Use this function to get text (HTML) from URLs asynchronously ###
 async def get_page(url):
