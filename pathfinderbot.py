@@ -244,7 +244,7 @@ async def coin(*, message: str):
         await bot.say(f"{message.upper()} price is {str(v)} {k.upper()}.")
 
 @bot.command()
-async def pydoc(*, message):
+async def pydoc(*, message: str):
     """
     Post a link to the python doc page for the requested module in chat.
     """
