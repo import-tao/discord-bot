@@ -27,13 +27,14 @@ Modified by Pathfinders
 '''
 
 import discord
-from discord.ext import commands
 import random
 import bs4
-from urllib.request import urlopen as uReq
-from bs4 import BeautifulSoup as soup
 import requests
 import json
+import os
+from discord.ext import commands
+from urllib.request import urlopen as uReq
+from bs4 import BeautifulSoup as soup
 
 
 # TODO: bot admin list and admin commands such as reloading of files
@@ -242,9 +243,16 @@ async def coin(*, message: str):
         await bot.say(f"{message.upper()} price is {str(v)} {k.upper()}.")
 
 # Run Bot
-with open('oxford_dictionary_api.txt', 'r') as oxford_key_file:
-    oxford_id = oxford_key_file.readline().rstrip()
-    oxford_key = oxford_key_file.readline().rstrip()
-with open('token.txt', 'r') as token_file:
-    token = token_file.readline().rstrip()
+#### non-heroku method of loading keys
+# with open('oxford_dictionary_api.txt', 'r') as oxford_key_file:
+#     oxford_id = oxford_key_file.readline().rstrip()
+#     oxford_key = oxford_key_file.readline().rstrip()
+# with open('token.txt', 'r') as token_file:
+#     token = token_file.readline().rstrip()
+
+#### Heroku method
+token = os.environ['TOKEN']
+oxford_id = os.environ['OXFORD_ID']
+oxford_key = os.environ['OXFORD_KEY']
+
 bot.run(token)
