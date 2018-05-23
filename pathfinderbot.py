@@ -86,6 +86,7 @@ async def joined(member : discord.Member):
 
 @bot.event
 async def on_member_join(member):
+    # Appears to be broken.
     """Welcomes a new member to the server and provides introductory info."""
     server = member.server
     fmt = 'Welcome {0.mention} to {1.name}!'
@@ -241,6 +242,24 @@ async def coin(*, message: str):
             await bot.say(f"{message.upper()} coin doesn't exists.")
             break
         await bot.say(f"{message.upper()} price is {str(v)} {k.upper()}.")
+
+@bot.command()
+async def pydoc(*, message):
+    """
+    Post a link to the python doc page for the requested module in chat.
+    """
+    req = await requests.get('https://docs.python.org/3/py-modindex.html')
+    page_soup = soup(req.text)
+    base_url = 'https://docs.python.org/3/library/'
+    # Check that requested module name is valid.
+    mod_list = [mod.text for mod in page_soup.findAll('code')]
+    if str(message) in mod_list:
+        doc_link = base_url + message
+        await bot.say(doc_link)
+    else:
+        await bot.say('"{}" does not appear to be a module in the standard library.'.format(message))
+        return
+
 
 # Run Bot
 #### non-heroku method of loading keys
