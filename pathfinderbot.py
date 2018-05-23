@@ -26,24 +26,53 @@ DEALINGS IN THE SOFTWARE.
 Modified by Pathfinders
 '''
 
-import discord
-import random
-import bs4
-import requests
-import json
 import os
+import json
+import random
+import aiohttp
+import discord
 from discord.ext import commands
 from urllib.request import urlopen as uReq
 from bs4 import BeautifulSoup as soup
+from aiohttp import web
 
-
-# TODO: bot admin list and admin commands such as reloading of files
 
 description = '''Based on an example bot to showcase the discord.ext.commands
 extension module, by Rapptz
 
 There are a number of utility commands being showcased here.'''
 bot = commands.Bot(command_prefix='!', description=description)
+
+### Use this function to get text (HTML) from URLs asynchronously ###
+# async def get_page(url):
+#     """
+#     Accepts a URL.
+#     Asynchronously retrieves a page from URL and returns it.
+#     """
+#     async with aiohttp.ClientSession() as session:
+#         async with session.get(url) as resp:
+#            return await resp.text()
+
+### Use this function to get text (HTML) from URLs asynchronously ###
+async def get_page(url):
+    """
+    Accepts a URL.
+    Asynchronously retrieves a page from URL and returns it.
+    """
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            return await resp.text()
+        
+### Use this function to get a raw response from URLs asynchronously ###
+async def get_json(url):
+    """
+    Accepts a URL.
+    Asynchronously retrieves a JSON response from URL and returns it.
+    """
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            return web.json_response(resp)
+
 
 @bot.event
 async def on_ready():
@@ -174,11 +203,9 @@ async def rps(*, message: str):
 async def random_module():
     """Links to a random Python 3 module from the standard library."""
     my_url = 'https://docs.python.org/3/py-modindex.html'
-    #open request, get soup and close
-    uClient = uReq(my_url)
-    page__html = uClient.read()
-    uClient.close()
-    page_soup = soup(page__html, 'html.parser')
+    #get page, get soup
+    page_html = await get_page(my_url)
+    page_soup = soup(page_html, 'html.parser')
 
     containers = page_soup.find_all("td")
     module_list = []
@@ -212,19 +239,19 @@ async def definition(*, message: str):
         word_id = message
 
         url = base_url + language + '/' + word_id.lower()
-
-        json_data = requests.get(url, headers = {'app_id': app_id, 'app_key': app_key}).json()
-
+        print('about to make request')
+        # json_data = await get_page(url, headers = {'app_id': app_id, 'app_key': app_key}).json()
+        async with get_page(url, headers = {'app_id': app_id, 'app_key': app_key}).json() as json_data:
         # for printing info
-        # r = requests.get(url, headers = {'app_id': app_id, 'app_key': app_key})
+        # r = await get_page(url, headers = {'app_id': app_id, 'app_key': app_key})
         # print("****code {}\n".format(r.status_code))
         # print("****text \n" + r.text)
         # print("****json \n" + json.dumps(r.json()))
 
         # Some kind of loop needed here to get all definitions insead of just the first one
-        definitions = json_data['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['definitions'][0]
+            definitions = json_data['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['definitions'][0]
         
-        await bot.say('The first definition of ' + message + ' I have is :\n' + definitions)
+            await bot.say('The first definition of ' + message + ' I have is :\n' + definitions)
     except:
         # If it cant find the word
         await bot.say('Are you sure thats a word in the dictionary?')
@@ -234,9 +261,10 @@ async def coin(*, message: str):
     """
     Coin command is returning the price from a specific coin in USD.
     """
-    r = requests.get('https://min-api.cryptocompare.com/data/price?fsym=' + message.upper() + '&tsyms=USD')
-    my_data = r.json()
-
+    r = await get_page('https://min-api.cryptocompare.com/data/price?fsym=' + message.upper() + '&tsyms=USD')
+    ### changed to account for async page loading
+    # my_data = r.json()
+    my_data = json.loads(r)
     for k, v in my_data.items():
         if str(v) == 'Error':
             await bot.say(f"{message.upper()} coin doesn't exists.")
@@ -248,8 +276,8 @@ async def pydoc(*, message: str):
     """
     Post a link to the python doc page for the requested module in chat.
     """
-    req = await requests.get('https://docs.python.org/3/py-modindex.html')
-    page_soup = soup(req.text)
+    page = await get_page('https://docs.python.org/3/py-modindex.html')
+    page_soup = soup(page, 'lxml')
     base_url = 'https://docs.python.org/3/library/'
     # Check that requested module name is valid.
     mod_list = [mod.text for mod in page_soup.findAll('code')]
@@ -263,15 +291,15 @@ async def pydoc(*, message: str):
 
 # Run Bot
 #### non-heroku method of loading keys
-# with open('oxford_dictionary_api.txt', 'r') as oxford_key_file:
-#     oxford_id = oxford_key_file.readline().rstrip()
-#     oxford_key = oxford_key_file.readline().rstrip()
-# with open('token.txt', 'r') as token_file:
-#     token = token_file.readline().rstrip()
+with open('oxford_dictionary_api.txt', 'r') as oxford_key_file:
+    oxford_id = oxford_key_file.readline().rstrip()
+    oxford_key = oxford_key_file.readline().rstrip()
+with open('token.txt', 'r') as token_file:
+    token = token_file.readline().rstrip()
 
 #### Heroku method
-token = os.environ['TOKEN']
-oxford_id = os.environ['OXFORD_ID']
-oxford_key = os.environ['OXFORD_KEY']
+# token = os.environ['TOKEN']
+# oxford_id = os.environ['OXFORD_ID']
+# oxford_key = os.environ['OXFORD_KEY']
 
 bot.run(token)
