@@ -257,7 +257,7 @@ async def pydoc(*, message):
         doc_link = base_url + message
         await bot.say(doc_link)
     else:
-        await bot.say('"{}" does not appear to be in the standard library.'.format(message))
+        await bot.say('"{}" does not appear to be a module in the standard library.'.format(message))
         return
 
 
