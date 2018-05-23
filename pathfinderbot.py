@@ -35,6 +35,7 @@ from discord.ext import commands
 from urllib.request import urlopen as uReq
 from bs4 import BeautifulSoup as soup
 from aiohttp import web
+import requests # This needs to be eliminated as it is a blocking function
 
 
 description = '''Based on an example bot to showcase the discord.ext.commands
@@ -43,15 +44,6 @@ extension module, by Rapptz
 There are a number of utility commands being showcased here.'''
 bot = commands.Bot(command_prefix='!', description=description)
 
-### Use this function to get text (HTML) from URLs asynchronously ###
-# async def get_page(url):
-#     """
-#     Accepts a URL.
-#     Asynchronously retrieves a page from URL and returns it.
-#     """
-#     async with aiohttp.ClientSession() as session:
-#         async with session.get(url) as resp:
-#            return await resp.text()
 
 ### Use this function to get text (HTML) from URLs asynchronously ###
 async def get_page(url):
@@ -238,10 +230,18 @@ async def definition(*, message: str):
         language = 'en'
         word_id = message
 
-        url = base_url + language + '/' + word_id.lower()
-        print('about to make request')
-        # json_data = await get_page(url, headers = {'app_id': app_id, 'app_key': app_key}).json()
-        async with get_page(url, headers = {'app_id': app_id, 'app_key': app_key}).json() as json_data:
+        page_url = base_url + language + '/' + word_id.lower()
+        reqheaders = {'app_id': app_id, 'app_key': app_key}
+        async with aiohttp.request(method='GET', url=page_url, headers=reqheaders) as resp:
+            json_data = json.loads(await resp.text())
+
+        # url = base_url + language + '/' + word_id.lower()
+        # json_data = requests.get(url, headers = {'app_id': app_id, 'app_key': app_key}).json()
+        
+        # json_data = json.loads(resp.text)
+        # print(json_data)
+
+        # json_data = json.loads(resp)
         # for printing info
         # r = await get_page(url, headers = {'app_id': app_id, 'app_key': app_key})
         # print("****code {}\n".format(r.status_code))
@@ -249,10 +249,11 @@ async def definition(*, message: str):
         # print("****json \n" + json.dumps(r.json()))
 
         # Some kind of loop needed here to get all definitions insead of just the first one
-            definitions = json_data['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['definitions'][0]
+        definitions = json_data['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['definitions'][0]
         
-            await bot.say('The first definition of ' + message + ' I have is :\n' + definitions)
-    except:
+        await bot.say('The first definition of ' + message + ' I have is :\n' + definitions)
+    except Exception as ex:
+        # print(ex)
         # If it cant find the word
         await bot.say('Are you sure thats a word in the dictionary?')
 
