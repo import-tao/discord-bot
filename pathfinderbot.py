@@ -192,14 +192,12 @@ async def rps(*, message: str):
             d['wins'] += 1
             await bot.say('Human wins: {}, Human losses: {}, Draws: {}'.format(d['wins'], d['loss'], d['draws']))
             d.close()
-            print('test')
 
         elif bot_choice == 'paper':
             await bot.say('My {} beats your {}! YOU LOSE'.format(bot_choice, player_choice))
             d['loss'] += 1
             await bot.say('Human wins: {}, Human losses: {}, Draws: {}'.format(d['wins'], d['loss'], d['draws']))
             d.close()
-            print('test')
 
     elif player_choice == 'paper':
         if bot_choice == 'rock':
