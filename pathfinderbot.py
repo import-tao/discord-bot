@@ -35,6 +35,7 @@ from discord.ext import commands
 from urllib.request import urlopen as uReq
 from bs4 import BeautifulSoup as soup
 from aiohttp import web
+import shelve
 
 
 description = '''Based on an example bot to showcase the discord.ext.commands
@@ -45,6 +46,8 @@ There are a number of utility commands being showcased here.'''
 bot = commands.Bot(command_prefix='!', description=description)
 
 ### Use this function to get text (HTML) from URLs asynchronously ###
+
+
 async def get_page(url):
     """
     Accepts a URL.
@@ -53,8 +56,10 @@ async def get_page(url):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
             return await resp.text()
-        
+
 ### Use this function to get a raw response from URLs asynchronously ###
+
+
 async def get_json(url):
     """
     Accepts a URL.
@@ -72,10 +77,12 @@ async def on_ready():
     print(bot.user.id)
     print('------')
 
+
 @bot.command()
 async def ping():
     """Responds with "Pong!\""""
     await bot.say('Pong!')
+
 
 @bot.command()
 async def pathfinders():
@@ -85,13 +92,15 @@ async def pathfinders():
             await bot.say(line)
     return
 
+
 @bot.command(description='For when you wanna settle the score some other way')
-async def choose(*choices : str):
+async def choose(*choices: str):
     """Chooses between multiple choices."""
     await bot.say(random.choice(choices))
 
+
 @bot.command()
-async def repeat(times : int, content='repeating...'):
+async def repeat(times: int, content='repeating...'):
     """Repeats a message multiple times."""
     if times < 10:
         for _ in range(times):
@@ -99,10 +108,12 @@ async def repeat(times : int, content='repeating...'):
     else:
         await bot.say("Really? Don't you think that's a little excessive?")
 
+
 @bot.command()
-async def joined(member : discord.Member):
+async def joined(member: discord.Member):
     """Says when a member joined."""
     await bot.say('{0.name} joined in {0.joined_at}'.format(member))
+
 
 @bot.event
 async def on_member_join(member):
@@ -125,6 +136,7 @@ async def on_member_join(member):
     for line in welcome:
         await bot.say(line)
 
+
 @bot.group(pass_context=True)
 async def cool(ctx):
     """Says if a user is cool.
@@ -134,14 +146,26 @@ async def cool(ctx):
     if ctx.invoked_subcommand is None:
         await bot.say('No, {0.subcommand_passed} is not cool'.format(ctx))
 
+
 @cool.command(name='bot')
 async def _bot():
     """Is the bot cool?"""
     await bot.say('Yes, the bot is cool.')
 
+
 @bot.command()
 async def rps(*, message: str):
     """Plays Rock Paper Scissors with the bot."""
+    # Check to see if scores exist yet
+    try:
+        d = shelve.open('rps_scores')
+        _ = d['wins']
+    except Exception:
+        d = shelve.open('rps_scores')
+        d['wins'] = 0
+        d['loss'] = 0
+        d['draws'] = 0
+
     # Change user input to full lenght string for to say back later when telling who won
     if message.lower() == 'r':
         player_choice = 'rock'
@@ -154,13 +178,7 @@ async def rps(*, message: str):
         return
 
     # print("player: ", player_choice)
-
-    # Get a random selection for the bots choice
-    selection = [
-    'rock',
-    'paper',
-    'scissors']
-    bot_choice = random.choice(selection)
+    bot_choice = random.choice(['rock', 'paper', 'scissors'])
     # print("bot: ", bot_choice)
 
     # Game logic:
@@ -170,31 +188,57 @@ async def rps(*, message: str):
     # TODO - lots of repetition in this section, could win/loss be decided by a function??
     if player_choice == 'rock':
         if bot_choice == 'scissors':
-            await bot.say('Your {} beats my {}! YOU WIN'.format(player_choice, bot_choice))     
+            await bot.say('Your {} beats my {}! YOU WIN'.format(player_choice, bot_choice))
+            d['wins'] += 1
+            await bot.say('Human wins: {}, Human losses: {}, Draws: {}'.format(d['wins'], d['loss'], d['draws']))
+            d.close()
+            print('test')
+
         elif bot_choice == 'paper':
             await bot.say('My {} beats your {}! YOU LOSE'.format(bot_choice, player_choice))
-            
+            d['loss'] += 1
+            await bot.say('Human wins: {}, Human losses: {}, Draws: {}'.format(d['wins'], d['loss'], d['draws']))
+            d.close()
+            print('test')
+
     elif player_choice == 'paper':
         if bot_choice == 'rock':
-            await bot.say('Your {} beats my {}! YOU WIN'.format(player_choice, bot_choice))    
+            await bot.say('Your {} beats my {}! YOU WIN'.format(player_choice, bot_choice))
+            d['wins'] += 1
+            await bot.say('Human wins: {}, Human losses: {}, Draws: {}'.format(d['wins'], d['loss'], d['draws']))
+            d.close()
+
         elif bot_choice == 'scissors':
             await bot.say('My {} beats your {}! YOU LOSE'.format(bot_choice, player_choice))
-    
+            d['loss'] += 1
+            await bot.say('Human wins: {}, Human losses: {}, Draws: {}'.format(d['wins'], d['loss'], d['draws']))
+            d.close()
+
     elif player_choice == 'scissors':
         if bot_choice == 'paper':
             await bot.say('Your {} beats my {}! YOU WIN'.format(player_choice, bot_choice))
-            
+            d['wins'] += 1
+            await bot.say('Human wins: {}, Human losses: {}, Draws: {}'.format(d['wins'], d['loss'], d['draws']))
+            d.close()
+
         elif bot_choice == 'rock':
             await bot.say('My {} beats your {} ! YOU LOSE'.format(bot_choice, player_choice))
-            
+            d['loss'] += 1
+            await bot.say('Human wins: {}, Human losses: {}, Draws: {}'.format(d['wins'], d['loss'], d['draws']))
+            d.close()
+
     if player_choice == bot_choice:
         await bot.say('Your {} draws with my {}.'.format(player_choice, bot_choice))
- 
+        d['draws'] += 1
+        await bot.say('Human wins: {}, Human losses: {}, Draws: {}'.format(d['wins'], d['loss'], d['draws']))
+        d.close()
+
+
 @bot.command()
 async def random_module():
     """Links to a random Python 3 module from the standard library."""
     my_url = 'https://docs.python.org/3/py-modindex.html'
-    #get page, get soup
+    # get page, get soup
     page_html = await get_page(my_url)
     page_soup = soup(page_html, 'html.parser')
 
@@ -204,7 +248,7 @@ async def random_module():
     for container in containers:
         # check if text contained
         if container.text != '':
-            #check if there is a link present
+            # check if there is a link present
             if container.a != None:
                 # print(container.text)
                 # print(container.a['href'])
@@ -215,6 +259,7 @@ async def random_module():
 
     await bot.say('You should do some reading about:\n {} , \nClick this link to read more: \n \
         {}{}'.format(selected_module[0], url_base, selected_module[1]))
+
 
 @bot.command()
 # command to get the first definition of a word using the Oxford English Dictionary API
@@ -236,7 +281,7 @@ async def definition(*, message: str):
 
         # url = base_url + language + '/' + word_id.lower()
         # json_data = requests.get(url, headers = {'app_id': app_id, 'app_key': app_key}).json()
-        
+
         # json_data = json.loads(resp.text)
         # print(json_data)
 
@@ -249,12 +294,13 @@ async def definition(*, message: str):
 
         # Some kind of loop needed here to get all definitions insead of just the first one
         definitions = json_data['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['definitions'][0]
-        
+
         await bot.say('The first definition of ' + message + ' I have is :\n' + definitions)
     except Exception as ex:
         # print(ex)
         # If it cant find the word
         await bot.say('Are you sure thats a word in the dictionary?')
+
 
 @bot.command()
 async def coin(*, message: str):
@@ -262,7 +308,7 @@ async def coin(*, message: str):
     Coin command is returning the price from a specific coin in USD.
     """
     r = await get_page('https://min-api.cryptocompare.com/data/price?fsym=' + message.upper() + '&tsyms=USD')
-    ### changed to account for async page loading
+    # changed to account for async page loading
     # my_data = r.json()
     my_data = json.loads(r)
     for k, v in my_data.items():
@@ -270,6 +316,7 @@ async def coin(*, message: str):
             await bot.say(f"{message.upper()} coin doesn't exists.")
             break
         await bot.say(f"{message.upper()} price is {str(v)} {k.upper()}.")
+
 
 @bot.command()
 async def pydoc(*, message: str):
@@ -290,14 +337,14 @@ async def pydoc(*, message: str):
 
 
 # Run Bot
-#### non-heroku method of loading keys
+# non-heroku method of loading keys
 # with open('oxford_dictionary_api.txt', 'r') as oxford_key_file:
 #     oxford_id = oxford_key_file.readline().rstrip()
 #     oxford_key = oxford_key_file.readline().rstrip()
 # with open('token.txt', 'r') as token_file:
 #     token = token_file.readline().rstrip()
 
-#### Heroku method
+# Heroku method
 token = os.environ['TOKEN']
 oxford_id = os.environ['OXFORD_ID']
 oxford_key = os.environ['OXFORD_KEY']
