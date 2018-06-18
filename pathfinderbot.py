@@ -36,6 +36,7 @@ from urllib.request import urlopen as uReq
 from bs4 import BeautifulSoup as soup
 from aiohttp import web
 import shelve
+import asyncio
 
 
 description = '''Based on an example bot to showcase the discord.ext.commands
@@ -70,12 +71,29 @@ async def get_json(url):
             return web.json_response(resp)
 
 
+async def scheduled_message():
+    """
+    Repeats a random message at a specified interval of days, run from on_ready event
+    Edit DAYS variable to change frequency of messages
+    """
+    await bot.wait_until_ready()
+    DAYS = 7
+    seconds_per_day = 86400
+    channel = bot.get_channel("429566712627593238")  # Miscellaneous in pathfinders
+    messages = ['Hello everyone! Friendly reminder to let us all know what project(s) you have been working on this week!']
+
+    while not bot.is_closed:
+        await bot.send_message(channel, random.choice(messages))
+        await asyncio.sleep(DAYS * seconds_per_day)
+
+
 @bot.event
 async def on_ready():
     print('Logged in as')
     print(bot.user.name)
     print(bot.user.id)
     print('------')
+    bot.bg_task = bot.loop.create_task(scheduled_message())
 
 
 @bot.command()
@@ -192,14 +210,12 @@ async def rps(*, message: str):
             d['wins'] += 1
             await bot.say('Human wins: {}, Human losses: {}, Draws: {}'.format(d['wins'], d['loss'], d['draws']))
             d.close()
-            print('test')
 
         elif bot_choice == 'paper':
             await bot.say('My {} beats your {}! YOU LOSE'.format(bot_choice, player_choice))
             d['loss'] += 1
             await bot.say('Human wins: {}, Human losses: {}, Draws: {}'.format(d['wins'], d['loss'], d['draws']))
             d.close()
-            print('test')
 
     elif player_choice == 'paper':
         if bot_choice == 'rock':
